@@ -1,27 +1,24 @@
 import pandas as pd
 import re
-import sys
-from tabulate import tabulate
 from itertools import combinations
 
 class DataChecker:
     def __init__(self, data: str):
-        self.data = pd.read_csv(data)
+        self.__data = pd.read_csv(data)
     
     @property
     def data(self):
-        return self._data
+        return self.__data
     
     @data.setter
     def data(self, data):
         if not isinstance(data, pd.DataFrame):
             raise TypeError(f"{data} must be a string")
 
-        self._data =data
+        self.__data = data
         
     def __str__(self):
         return f"DataChecker object with {self.data} attached"
-
 
     # Return Column Names:
     def columnNames(self):
@@ -45,7 +42,7 @@ class DataChecker:
             for c in combinations(self.data.columns, n):
                 
                 # Check if there are no duplicated rows in the subset of columns
-                if not self.data[list(c)].duplicated().any():
+                if not self.data[list(c)].duplicated().any() and not self.data[list(c)].isnull().any().any():
                      minimalKey = self.data[list(c)].columns
                      print(f'A minimal primary key found: {", ".join(str(col) for col in minimalKey)}')
                      return minimalKey
@@ -59,13 +56,13 @@ class DataChecker:
         
         # Print a pseudo-error if missing data is found
         if self.data[columnName].isnull().any() == True:
-            print(f'Execution halted: Missing data found in {columnName}')
+            raise ValueError(f'Execution halted: Missing data found in {columnName}')
         
         # Retrieve User-Identified NPI column:
         npiVals = self.data[columnName].astype(str)
         
         # Check regular exp
-        if all(re.match(r'^\d{10}$', string) for string in npiVals):
+        if all(re.match(r'^\d{10}$', string) and len(string) == 10 for string in npiVals):
             return "Valid"
         else:
             return "Invalid"
@@ -76,13 +73,13 @@ class DataChecker:
             return f'{columnName} not found'
         
         if self.data[columnName].isnull().any() == True:
-            print(f'Execution halted: Missing data found in {columnName}')
+            raise ValueError(f'Execution halted: Missing data found in {columnName}')
         
         # Retrieve User-Identified MPN column:
         mpnVals = self.data[columnName].astype(str)
         
         # Check regular exp
-        if all(re.match(r'^\d{6}$', string) for string in mpnVals):
+        if all(re.match(r'^\d{6}$', string) and len(string) == 6 for string in mpnVals):
             return "Valid"
         else:
             return "Invalid"
