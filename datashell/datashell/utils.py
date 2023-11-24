@@ -90,12 +90,3 @@ class DataChecker:
             return self.data.describe()
         else:
             return self.data[columnName].describe()
-        
-
-def main():
-    data = input("CSV file: ")
-    data_checker = DataChecker(data)
-    return data_checker.minimalPrimaryKey()
-
-if __name__ == "__main__":
-    main()
